@@ -1,0 +1,153 @@
+mysql> USE library_management;
+Database changed
+mysql> CREATE TABLE users (
+    ->     user_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     name VARCHAR(100) NOT NULL,
+    ->     email VARCHAR(100) UNIQUE NOT NULL,
+    ->     password VARCHAR(255) NOT NULL,
+    ->     role ENUM('ADMIN','LIBRARIAN','STUDENT') DEFAULT 'STUDENT',
+    ->     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> CREATE TABLE books (
+    ->     book_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     title VARCHAR(255) NOT NULL,
+    ->     author VARCHAR(255) NOT NULL,
+    ->     isbn VARCHAR(20) UNIQUE,
+    ->     category VARCHAR(100),
+    ->     total_copies INT DEFAULT 1,
+    ->     available_copies INT DEFAULT 1,
+    ->     published_year INT,
+    ->     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> CREATE TABLE issued_books (
+    ->     issue_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     user_id INT NOT NULL,
+    ->     book_id INT NOT NULL,
+    ->     issue_date DATE NOT NULL,
+    ->     due_date DATE NOT NULL,
+    ->     return_date DATE,
+    ->     status ENUM('ISSUED','RETURNED') DEFAULT 'ISSUED',
+    ->
+    ->     FOREIGN KEY(user_id) REFERENCES users(user_id),
+    ->     FOREIGN KEY(book_id) REFERENCES books(book_id)
+    -> );
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> CREATE TABLE reservations (
+    ->     reservation_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     user_id INT NOT NULL,
+    ->     book_id INT NOT NULL,
+    ->     reservation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ->
+    ->     FOREIGN KEY(user_id) REFERENCES users(user_id),
+    ->     FOREIGN KEY(book_id) REFERENCES books(book_id)
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> CREATE TABLE fines (
+    ->     fine_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     issue_id INT NOT NULL,
+    ->     amount DECIMAL(10,2) DEFAULT 0,
+    ->     paid BOOLEAN DEFAULT FALSE,
+    ->
+    ->     FOREIGN KEY(issue_id) REFERENCES issued_books(issue_id)
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> INSERT INTO users(name,email,password,role)
+    -> VALUES
+    -> ('Admin','admin@gmail.com','admin123','ADMIN'),
+    -> ('Student1','student@gmail.com','student123','STUDENT');
+Query OK, 2 rows affected (0.01 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql>
+mysql> INSERT INTO books
+    -> (title,author,isbn,category,total_copies,available_copies,published_year)
+    -> VALUES
+    -> ('Java Programming','James Gosling','9781234567890',
+    -> 'Programming',10,10,2023),
+    -> ('Database Systems','Elmasri','9780987654321',
+    -> 'Database',5,5,2022);
+Query OK, 2 rows affected (0.00 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql> SELECT * FROM table_name;
+ERROR 1146 (42S02): Table 'library_management.table_name' doesn't exist
+mysql> SELECT * FROM users;
++---------+----------+-------------------+------------+---------+---------------------+
+| user_id | name     | email             | password   | role    | created_at          |
++---------+----------+-------------------+------------+---------+---------------------+
+|       1 | Admin    | admin@gmail.com   | admin123   | ADMIN   | 2026-06-23 23:40:02 |
+|       2 | Student1 | student@gmail.com | student123 | STUDENT | 2026-06-23 23:40:02 |
++---------+----------+-------------------+------------+---------+---------------------+
+2 rows in set (0.00 sec)
+
+mysql> SELECT * FROM books;
++---------+------------------+---------------+---------------+-------------+--------------+------------------+----------------+---------------------+
+| book_id | title            | author        | isbn          | category    | total_copies | available_copies | published_year | created_at          |
++---------+------------------+---------------+---------------+-------------+--------------+------------------+----------------+---------------------+
+|       1 | Java Programming | James Gosling | 9781234567890 | Programming |           10 |               10 |           2023 | 2026-06-23 23:40:03 |
+|       2 | Database Systems | Elmasri       | 9780987654321 | Database    |            5 |                5 |           2022 | 2026-06-23 23:40:03 |
++---------+------------------+---------------+---------------+-------------+--------------+------------------+----------------+---------------------+
+2 rows in set (0.00 sec)
+
+mysql> SELECT * FROM issued_books;
+Empty set (0.00 sec)
+
+mysql> SELECT * FROM reservations;
+Empty set (0.00 sec)
+
+mysql> SELECT * FROM fines;
+Empty set (0.02 sec)
+
+mysql> SELECT name, email FROM users;
++----------+-------------------+
+| name     | email             |
++----------+-------------------+
+| Admin    | admin@gmail.com   |
+| Student1 | student@gmail.com |
++----------+-------------------+
+2 rows in set (0.00 sec)
+
+mysql> SHOW TABLES;
++------------------------------+
+| Tables_in_library_management |
++------------------------------+
+| books                        |
+| fines                        |
+| issued_books                 |
+| reservations                 |
+| users                        |
++------------------------------+
+5 rows in set (0.00 sec)
+
+mysql> DESC users;
++------------+-------------------------------------+------+-----+-------------------+----------------+
+| Field      | Type                                | Null | Key | Default           | Extra          |
++------------+-------------------------------------+------+-----+-------------------+----------------+
+| user_id    | int(11)                             | NO   | PRI | NULL              | auto_increment |
+| name       | varchar(100)                        | NO   |     | NULL              |                |
+| email      | varchar(100)                        | NO   | UNI | NULL              |                |
+| password   | varchar(255)                        | NO   |     | NULL              |                |
+| role       | enum('ADMIN','LIBRARIAN','STUDENT') | YES  |     | STUDENT           |                |
+| created_at | timestamp                           | NO   |     | CURRENT_TIMESTAMP |                |
++------------+-------------------------------------+------+-----+-------------------+----------------+
+6 rows in set (0.00 sec)
+
+mysql> DESCRIBE users;
++------------+-------------------------------------+------+-----+-------------------+----------------+
+| Field      | Type                                | Null | Key | Default           | Extra          |
++------------+-------------------------------------+------+-----+-------------------+----------------+
+| user_id    | int(11)                             | NO   | PRI | NULL              | auto_increment |
+| name       | varchar(100)                        | NO   |     | NULL              |                |
+| email      | varchar(100)                        | NO   | UNI | NULL              |                |
+| password   | varchar(255)                        | NO   |     | NULL              |                |
+| role       | enum('ADMIN','LIBRARIAN','STUDENT') | YES  |     | STUDENT           |                |
+| created_at | timestamp                           | NO   |     | CURRENT_TIMESTAMP |                |
++------------+-------------------------------------+------+-----+-------------------+----------------+
+6 rows in set (0.01 sec)
